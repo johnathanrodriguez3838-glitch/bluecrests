@@ -6,24 +6,24 @@
 import { Transaction, UserProfile, StockData } from './types';
 
 export const USER_DATA: UserProfile = {
-  surname: "Richard",
-  middleName: "William",
-  lastName: "O’dell",
-  username: "Richard William",
-  email: "richsamodell@gmail.com",
-  pin: "070811",
-  dob: "02 - 03 - 1958",
-  phone: "07426490718",
-  country: "England",
-  state: "Cumbria",
-  city: "Carlisle",
-  balance: 565000,
-  gender: "Male",
-  occupation: "Retired",
-  address: "29 Barnett drive seaton workington Cumbria CA 14. 1QN",
+  surname: "Barbara",
+  middleName: "",
+  lastName: "Brockman",
+  username: "Barbara98",
+  email: "brockmanbarbara8@gmail.com",
+  pin: "1975",
+  dob: "1975",
+  phone: "252 203 3663",
+  country: "Underfed state",
+  state: "NC",
+  city: "Cary",
+  balance: 3800000,
+  gender: "Female",
+  occupation: "",
+  address: "105 Woodland Ridg Court Cary NC",
   accountNumber: "****9995",
   branchCode: "RBSUS002",
-  password: "richsamo1958"
+  password: "Personal@444"
 };
 
 export const TRANSACTIONS: Transaction[] = [
@@ -145,4 +145,4 @@ export const ACTIVITY_DATA = [
   { name: 'Sun', value: 55 },
 ];
 
-export const PROFILE_IMAGE = "/profile.jpg";
+export const PROFILE_IMAGE = "https://res.cloudinary.com/dcksy6lcp/image/upload/v1/1b2dd907c73ce868394daa1202865cbf.jpg";

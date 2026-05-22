@@ -1,8 +1,8 @@
 import { Bell, Shield, Info, AlertTriangle } from 'lucide-react';
 
 const NOTIFICATIONS = [
-  { id: 1, title: 'Security Alert', message: 'A new device logged into your account from Carlisle, UK.', time: '2 hours ago', type: 'security' },
-  { id: 2, title: 'Transfer Received', message: 'You received £5,000.00 from William O’dell.', time: '5 hours ago', type: 'info' },
+  { id: 1, title: 'Security Alert', message: 'A new device logged into your account from Cary, NC.', time: '2 hours ago', type: 'security' },
+  { id: 2, title: 'Transfer Received', message: 'You received $5,000.00 from Frank Brockman.', time: '5 hours ago', type: 'info' },
   { id: 3, title: 'Limit Warning', message: 'You have reached 80% of your daily transfer limit.', time: '1 day ago', type: 'warning' },
   { id: 4, title: 'Welcome to Blue Crest', message: 'Thank you for choosing Blue Crest Premium Banking.', time: '2 days ago', type: 'info' },
 ];

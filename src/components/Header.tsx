@@ -1,5 +1,5 @@
 import { Search, Bell, Maximize2, ChevronDown, Menu } from 'lucide-react';
-import { USER_DATA, PROFILE_IMAGE } from '@/src/constants';
+import { USER_DATA } from '@/src/constants';
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -40,12 +40,8 @@ export default function Header({ onMenuClick }: HeaderProps) {
             </p>
           </div>
           
-          <div className="w-10 h-10 rounded-full border-2 border-white shadow-sm flex items-center justify-center overflow-hidden ring-1 ring-slate-100 bg-slate-50">
-             <img 
-               src={PROFILE_IMAGE} 
-               alt="Profile" 
-               className="w-full h-full object-cover"
-             />
+          <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-200 text-[#003399] font-bold text-xs flex items-center justify-center shadow-sm select-none">
+            {((USER_DATA.surname?.charAt(0) || '') + (USER_DATA.lastName?.charAt(0) || '')).toUpperCase() || 'U'}
           </div>
         </div>
       </div>

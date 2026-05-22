@@ -108,7 +108,7 @@ export default function Sidebar({ activeTab, setActiveTab, isOpen, setIsOpen, on
           <div className="w-full bg-slate-700 h-1 rounded-full mb-3">
             <div className="bg-[#00f2fe] h-full rounded-full" style={{ width: '74%' }} />
           </div>
-          <p className="text-[10px] text-slate-400 leading-tight">You're £2,400 away from your summer trip goal.</p>
+          <p className="text-[10px] text-slate-400 leading-tight">You're $2,400 away from your summer trip goal.</p>
         </div>
 
         <button 

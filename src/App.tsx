@@ -13,7 +13,7 @@ import NotificationsPage from './components/NotificationsPage';
 import SummaryPage from './components/SummaryPage';
 import StocksPage from './components/StocksPage';
 import LoginPage from './components/LoginPage';
-import { RestrictedModal, SelectTransferTypeModal } from './components/Modals';
+import { RestrictedModal, SelectTransferTypeModal, TransferSuccessModal, TransferCodeModal } from './components/Modals';
 import { motion, AnimatePresence } from 'motion/react';
 import { USER_DATA, TRANSACTIONS, PROFILE_IMAGE } from './constants';
 import { cn } from './lib/utils';
@@ -25,6 +25,45 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isRestrictedModalOpen, setIsRestrictedModalOpen] = useState(false);
   const [isSelectTypeModalOpen, setIsSelectTypeModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isTransferCodeModalOpen, setIsTransferCodeModalOpen] = useState(false);
+  const [transactions, setTransactions] = useState(TRANSACTIONS);
+  const [balance, setBalance] = useState(USER_DATA.balance);
+  const [transferCount, setTransferCount] = useState(0);
+  const [lastTransfer, setLastTransfer] = useState<{ amount: number; recipientName: string; bankName: string; accountNumber: string } | null>(null);
+  const [pendingTransfer, setPendingTransfer] = useState<{
+    txnId: string;
+    amount: number;
+    recipientName: string;
+    bankName: string;
+    accountNumber: string;
+  } | null>(null);
+
+  const handleVerifyTransferCode = useCallback(() => {
+    if (!pendingTransfer) return;
+
+    // Increment count of completed/initiated transfers
+    setTransferCount(prev => prev + 1);
+
+    // Deduct standard balance
+    setBalance(prev => Math.max(0, prev - pendingTransfer.amount));
+
+    // Update pending transaction state in history to Pending
+    setTransactions(prev => prev.map(t => 
+      t.id === pendingTransfer.txnId ? { ...t, status: 'Pending' as const } : t
+    ));
+
+    // Store details for success modal display
+    setLastTransfer({
+      amount: pendingTransfer.amount,
+      recipientName: pendingTransfer.recipientName,
+      bankName: pendingTransfer.bankName,
+      accountNumber: pendingTransfer.accountNumber
+    });
+
+    setIsTransferCodeModalOpen(false);
+    setIsSuccessModalOpen(true);
+  }, [pendingTransfer]);
 
   const handleLogout = () => {
     setIsLoggedIn(false);
@@ -65,10 +104,48 @@ export default function App() {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardOverview onActionClick={handleActionClick} />;
+        return <DashboardOverview onActionClick={handleActionClick} balance={balance} transactions={transactions} />;
       case 'local-transfer':
       case 'intl-transfer':
-        return <TransferPage onTransferSubmit={() => setIsRestrictedModalOpen(true)} />;
+        return (
+          <TransferPage 
+            availableBalance={balance} 
+            onTransferSubmit={(data) => {
+              if (transferCount >= 3) {
+                // 4th and beyond is restricted
+                setIsRestrictedModalOpen(true);
+              } else {
+                // Submit step, initially showing "Pending"
+                const txnId = `TXN-${Math.floor(100000 + Math.random() * 900000)}`;
+                const newTxn = {
+                  id: txnId,
+                  name: data.recipientName,
+                  date: new Date().toISOString().split('T')[0],
+                  time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+                  amount: data.amount,
+                  type: 'debit' as const,
+                  status: 'Pending' as const,
+                  category: data.description || 'Fund Transfer'
+                };
+
+                // Add to history in 'Pending' status
+                setTransactions(prev => [newTxn, ...prev]);
+
+                // Store details for verification
+                setPendingTransfer({
+                  txnId,
+                  amount: data.amount,
+                  recipientName: data.recipientName,
+                  bankName: data.bankName,
+                  accountNumber: data.accountNumber
+                });
+
+                // Open transfer authorization pin code modal
+                setIsTransferCodeModalOpen(true);
+              }
+            }} 
+          />
+        );
       case 'details':
         return (
           <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-slate-50 max-w-4xl mx-auto">
@@ -115,7 +192,7 @@ export default function App() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
-                    {TRANSACTIONS.map((trx) => (
+                    {transactions.map((trx) => (
                       <tr key={trx.id} className="hover:bg-slate-50/50 transition-colors group">
                         <td className="py-5 pl-2">
                           <p className="text-[11px] font-mono font-bold text-slate-400">#{trx.id}</p>
@@ -142,7 +219,7 @@ export default function App() {
                             "text-sm font-bold",
                             trx.type === 'credit' ? "text-emerald-500" : "text-rose-500"
                           )}>
-                            {trx.type === 'credit' ? '+' : '-'}£{trx.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            {trx.type === 'credit' ? '+' : '-'}${trx.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                           </p>
                         </td>
                       </tr>
@@ -212,6 +289,25 @@ export default function App() {
         isOpen={isSelectTypeModalOpen} 
         onClose={() => setIsSelectTypeModalOpen(false)}
         onSelect={handleTransferTypeSelect}
+      />
+
+      <TransferSuccessModal
+        isOpen={isSuccessModalOpen}
+        onClose={() => {
+          setIsSuccessModalOpen(false);
+          setActiveTab('dashboard');
+        }}
+        amount={lastTransfer?.amount || 0}
+        recipientName={lastTransfer?.recipientName || ''}
+        bankName={lastTransfer?.bankName || ''}
+        accountNumber={lastTransfer?.accountNumber || ''}
+      />
+
+      <TransferCodeModal
+        isOpen={isTransferCodeModalOpen}
+        onClose={() => setIsTransferCodeModalOpen(false)}
+        onVerify={handleVerifyTransferCode}
+        amount={pendingTransfer?.amount || 0}
       />
     </div>
   );

@@ -1,9 +1,49 @@
-import { useState } from 'react';
-import { Send, User, Building2, CreditCard, FileText, Globe } from 'lucide-react';
-import { USER_DATA } from '@/src/constants';
+import React, { useState } from 'react';
+import { Send, User, Building2, CreditCard, FileText, Globe, Hash } from 'lucide-react';
 
-export default function TransferPage({ onTransferSubmit }: { onTransferSubmit: () => void }) {
+interface TransferSubmitData {
+  recipientName: string;
+  bankName: string;
+  accountNumber: string;
+  routingNumber?: string;
+  amount: number;
+  description: string;
+}
+
+export default function TransferPage({ 
+  onTransferSubmit,
+  availableBalance
+}: { 
+  onTransferSubmit: (data: TransferSubmitData) => void;
+  availableBalance: number;
+}) {
   const [transferType, setTransferType] = useState<'local' | 'intl'>('local');
+  const [recipientName, setRecipientName] = useState('');
+  const [bankName, setBankName] = useState('');
+  const [accountNumber, setAccountNumber] = useState('');
+  const [routingNumber, setRoutingNumber] = useState('');
+  const [amount, setAmount] = useState('');
+  const [description, setDescription] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onTransferSubmit({
+      recipientName: recipientName || 'Unspecified Recipient',
+      bankName,
+      accountNumber,
+      routingNumber: routingNumber || undefined,
+      amount: parseFloat(amount) || 0,
+      description: description || 'Fund Transfer'
+    });
+    
+    // Clear form
+    setRecipientName('');
+    setBankName('');
+    setAccountNumber('');
+    setRoutingNumber('');
+    setAmount('');
+    setDescription('');
+  };
 
   return (
     <div className="max-w-4xl mx-auto py-8">
@@ -16,28 +56,30 @@ export default function TransferPage({ onTransferSubmit }: { onTransferSubmit: (
           <div className="flex bg-slate-50 p-1 rounded-2xl border border-slate-100 w-full sm:w-auto">
             <button 
               onClick={() => setTransferType('local')}
-              className={`flex-1 sm:flex-none px-6 py-2 rounded-xl text-xs font-bold transition-all ${transferType === 'local' ? 'bg-white text-[#003399] shadow-sm' : 'text-slate-400'}`}
+              className={`flex-1 sm:flex-none px-6 py-2 rounded-xl text-xs font-bold transition-all ${transferType === 'local' ? 'bg-white text-[#003399]" shadow-sm' : 'text-slate-400'}`}
             >
               Local
             </button>
             <button 
               onClick={() => setTransferType('intl')}
-              className={`flex-1 sm:flex-none px-6 py-2 rounded-xl text-xs font-bold transition-all ${transferType === 'intl' ? 'bg-white text-[#003399] shadow-sm' : 'text-slate-400'}`}
+              className={`flex-1 sm:flex-none px-6 py-2 rounded-xl text-xs font-bold transition-all ${transferType === 'intl' ? 'bg-white text-[#003399]" shadow-sm' : 'text-slate-400'}`}
             >
               International
             </button>
           </div>
         </div>
 
-        <form className="space-y-8" onSubmit={(e) => { e.preventDefault(); onTransferSubmit(); }}>
+        <form className="space-y-8" onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Recipient Name</label>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Recipient Account Holder Name</label>
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
                 <input 
                   type="text" 
-                  placeholder="Recipient Full Name" 
+                  value={recipientName}
+                  onChange={(e) => setRecipientName(e.target.value)}
+                  placeholder="e.g. John Doe" 
                   className="w-full h-14 bg-slate-50 border border-slate-100 focus:bg-white focus:border-indigo-100 rounded-2xl pl-12 pr-4 text-sm font-semibold outline-none transition-all"
                   required
                 />
@@ -45,12 +87,14 @@ export default function TransferPage({ onTransferSubmit }: { onTransferSubmit: (
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Bank Name</label>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Recipient Bank Name</label>
               <div className="relative">
                 <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
                 <input 
                   type="text" 
-                  placeholder="Recipient Bank Name" 
+                  value={bankName}
+                  onChange={(e) => setBankName(e.target.value)}
+                  placeholder="e.g. Chase Bank" 
                   className="w-full h-14 bg-slate-50 border border-slate-100 focus:bg-white focus:border-indigo-100 rounded-2xl pl-12 pr-4 text-sm font-semibold outline-none transition-all"
                   required
                 />
@@ -58,14 +102,14 @@ export default function TransferPage({ onTransferSubmit }: { onTransferSubmit: (
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">
-                {transferType === 'local' ? 'Account Number' : 'IBAN / Swift Code'}
-              </label>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Recipient Account Number</label>
               <div className="relative">
                 <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
                 <input 
                   type="text" 
-                  placeholder={transferType === 'local' ? "0000 1111 2222" : "GB29 XXXX XXXX XXXX"}
+                  value={accountNumber}
+                  onChange={(e) => setAccountNumber(e.target.value)}
+                  placeholder="Account Number"
                   className="w-full h-14 bg-slate-50 border border-slate-100 focus:bg-white focus:border-indigo-100 rounded-2xl pl-12 pr-4 text-sm font-semibold outline-none transition-all"
                   required
                 />
@@ -73,11 +117,27 @@ export default function TransferPage({ onTransferSubmit }: { onTransferSubmit: (
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Amount (£)</label>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Routing Number (Optional)</label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">£</span>
+                <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
+                <input 
+                  type="text" 
+                  value={routingNumber}
+                  onChange={(e) => setRoutingNumber(e.target.value)}
+                  placeholder="9-digit routing number (optional)" 
+                  className="w-full h-14 bg-slate-50 border border-slate-100 focus:bg-white focus:border-indigo-100 rounded-2xl pl-12 pr-4 text-sm font-semibold outline-none transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Amount ($)</label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">$</span>
                 <input 
                   type="number" 
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
                   placeholder="0.00" 
                   className="w-full h-14 bg-slate-50 border border-slate-100 focus:bg-white focus:border-indigo-100 rounded-2xl pl-10 pr-4 text-sm font-semibold outline-none transition-all"
                   required
@@ -91,6 +151,8 @@ export default function TransferPage({ onTransferSubmit }: { onTransferSubmit: (
             <div className="relative">
               <FileText className="absolute left-4 top-6 w-5 h-5 text-slate-300" />
               <textarea 
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
                 placeholder="What is this for?"
                 className="w-full h-32 bg-slate-50 border border-slate-100 focus:bg-white focus:border-indigo-100 rounded-2xl pl-12 pr-4 py-5 text-sm font-semibold outline-none transition-all resize-none"
               />
@@ -106,7 +168,7 @@ export default function TransferPage({ onTransferSubmit }: { onTransferSubmit: (
               {transferType === 'local' ? 'Transfer Now' : 'Initiate International Transfer'}
             </button>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-6">
-              Total available balance: £{USER_DATA.balance.toLocaleString()}.00
+              Total available balance: ${availableBalance.toLocaleString()}.00
             </p>
           </div>
         </form>

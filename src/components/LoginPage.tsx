@@ -10,7 +10,7 @@ function cn(...classes: (string | boolean | undefined)[]) {
 export default function LoginPage({ onLogin }: { onLogin: () => void }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [pin, setPin] = useState(['', '', '', '', '', '']);
+  const [pin, setPin] = useState(['', '', '', '']);
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -48,7 +48,7 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
     setPin(newPin);
 
     // Auto focus next input
-    if (value && index < 5) {
+    if (value && index < 3) {
       const nextInput = document.getElementById(`pin-${index + 1}`);
       nextInput?.focus();
     }
@@ -72,7 +72,7 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
       }, 1000);
     } else {
       setError('Invalid security pin. Please try again.');
-      setPin(['', '', '', '', '', '']);
+      setPin(['', '', '', '']);
       document.getElementById('pin-0')?.focus();
     }
   };
@@ -222,8 +222,8 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
                 className="space-y-8"
               >
                 <div className="space-y-4">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block text-center">Enter 6-Digit Secure PIN</label>
-                  <div className="flex justify-between gap-2">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block text-center">Enter 4-Digit Secure PIN</label>
+                  <div className="flex justify-center gap-4 max-w-sm mx-auto">
                     {pin.map((digit, idx) => (
                       <input
                         key={idx}
@@ -233,7 +233,7 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
                         value={digit}
                         onChange={(e) => handlePinChange(idx, e.target.value)}
                         onKeyDown={(e) => handleKeyDown(idx, e)}
-                        className="w-full h-14 text-center bg-slate-50 border border-slate-100 rounded-xl text-xl font-bold focus:bg-white focus:border-blue-200 outline-none transition-all"
+                        className="w-14 h-14 text-center bg-slate-50 border border-slate-100 rounded-xl text-xl font-bold focus:bg-white focus:border-blue-200 outline-none transition-all"
                         required
                       />
                     ))}

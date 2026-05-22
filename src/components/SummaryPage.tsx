@@ -50,22 +50,22 @@ export default function SummaryPage() {
         <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col justify-between">
           <div>
             <h3 className="text-sm font-bold text-slate-900 mb-2 uppercase tracking-widest opacity-50">Net Worth</h3>
-            <p className="text-5xl font-bold text-slate-900 tracking-tight">£{USER_DATA.balance.toLocaleString()}<span className="text-slate-300">.00</span></p>
+            <p className="text-5xl font-bold text-slate-900 tracking-tight">${USER_DATA.balance.toLocaleString()}<span className="text-slate-300">.00</span></p>
             <p className="text-[10px] font-bold text-emerald-500 mt-4 tracking-[3px] uppercase">Growing +12.5% THIS YEAR</p>
           </div>
           
           <div className="space-y-4 mt-8">
             <div className="flex justify-between items-center py-3 border-b border-slate-50">
               <span className="text-sm font-medium text-slate-500">Savings Account</span>
-              <span className="text-sm font-bold text-slate-900">£420,000.00</span>
+              <span className="text-sm font-bold text-slate-900">$2,800,000.00</span>
             </div>
             <div className="flex justify-between items-center py-3 border-b border-slate-50">
               <span className="text-sm font-medium text-slate-500">Investment Portfolio</span>
-              <span className="text-sm font-bold text-slate-900">£145,000.00</span>
+              <span className="text-sm font-bold text-slate-900">$900,000.00</span>
             </div>
             <div className="flex justify-between items-center py-3">
               <span className="text-sm font-medium text-slate-500">Available Credit</span>
-              <span className="text-sm font-bold text-slate-900">£25,000.00</span>
+              <span className="text-sm font-bold text-slate-900">$100,000.00</span>
             </div>
           </div>
         </div>

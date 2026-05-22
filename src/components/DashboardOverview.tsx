@@ -33,11 +33,19 @@ const QUICK_ACTIONS = [
   { id: 'security', label: 'Account', icon: User, color: 'text-slate-500', bg: 'bg-slate-50' },
 ];
 
-export default function DashboardOverview({ onActionClick }: { onActionClick: (id: string) => void }) {
+export default function DashboardOverview({ 
+  onActionClick,
+  balance = USER_DATA.balance,
+  transactions = TRANSACTIONS
+}: { 
+  onActionClick: (id: string) => void;
+  balance?: number;
+  transactions?: any[];
+}) {
   const formatCurrency = (amt: number) => {
-    return new Intl.NumberFormat('en-GB', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'GBP',
+      currency: 'USD',
       minimumFractionDigits: 2
     }).format(amt);
   };
@@ -52,17 +60,17 @@ export default function DashboardOverview({ onActionClick }: { onActionClick: (i
           <div className="relative z-10">
             <p className="text-[10px] md:text-sm text-blue-200/60 mb-2 font-bold uppercase tracking-widest">Available Balance</p>
             <h2 className="text-4xl md:text-6xl font-bold tracking-tighter">
-              £{USER_DATA.balance.toLocaleString()}<span className="text-blue-300/30">.00</span>
+              ${balance.toLocaleString()}<span className="text-blue-300/30">.00</span>
             </h2>
           </div>
           <div className="flex flex-wrap gap-x-10 gap-y-6 mt-10 md:mt-16 relative z-10">
             <div>
               <p className="text-[9px] md:text-[10px] text-blue-200/50 uppercase tracking-widest font-bold mb-1">Monthly Income</p>
-              <p className="text-base md:text-xl font-bold text-emerald-400">+ £12,450</p>
+              <p className="text-base md:text-xl font-bold text-emerald-400">+ $12,450</p>
             </div>
             <div>
               <p className="text-[9px] md:text-[10px] text-blue-200/50 uppercase tracking-widest font-bold mb-1">Monthly Spending</p>
-              <p className="text-base md:text-xl font-bold text-rose-400">- £3,820</p>
+              <p className="text-base md:text-xl font-bold text-rose-400">- $3,820</p>
             </div>
             <div className="hidden sm:block">
               <p className="text-[9px] md:text-[10px] text-blue-200/50 uppercase tracking-widest font-bold mb-1">Account Status</p>
@@ -154,7 +162,7 @@ export default function DashboardOverview({ onActionClick }: { onActionClick: (i
           </div>
           <div className="px-5 md:px-8 py-2 overflow-y-auto flex-1 custom-scrollbar">
             <div className="divide-y divide-slate-50">
-              {TRANSACTIONS.slice(0, 8).map((trx) => (
+              {transactions.slice(0, 8).map((trx) => (
                 <div key={trx.id} className="py-4 md:py-5 flex items-center justify-between group">
                   <div className="flex items-center space-x-3 md:space-x-4">
                     <div className={cn(
@@ -170,7 +178,7 @@ export default function DashboardOverview({ onActionClick }: { onActionClick: (i
                   </div>
                   <div className="text-right ml-4 shrink-0">
                     <p className={cn("font-bold text-sm", trx.type === 'debit' ? "text-rose-500" : "text-emerald-500")}>
-                      {trx.type === 'debit' ? '-' : '+'}£{trx.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      {trx.type === 'debit' ? '-' : '+'}${trx.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                     </p>
                     <p className="text-[8px] md:text-[9px] font-bold text-slate-300 uppercase tracking-widest">{trx.status}</p>
                   </div>

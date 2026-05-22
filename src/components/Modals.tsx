@@ -56,27 +56,19 @@ export function RestrictedModal({ isOpen, onClose }: { isOpen: boolean; onClose:
         </div>
         
         <div className="space-y-4">
-          <p className="text-slate-600 leading-relaxed font-medium">
-            For security, compliance, geographical verification, and account protection purposes, 
-            both local and international transfers are currently restricted on this account.
+          <p className="text-xs font-bold text-rose-600 uppercase tracking-widest text-[10px]">Security Lock Active</p>
+          <p className="text-slate-700 leading-relaxed font-bold text-sm">
+            Account has been restricted from making transfers. Additional details should be submitted at the bank or talk to an account officer.
           </p>
-          <p className="text-slate-600 leading-relaxed font-medium">
-            Please contact your account officer or visit your registered branch for further 
-            verification and transfer activation.
+          <p className="text-slate-500 leading-relaxed text-xs">
+            For security, compliance, identity verification, and fraud prevention purposes, outgoing transaction services are restricted. Please consult your relationship officer or find your nearest branch.
           </p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 w-full mt-4">
           <button 
             onClick={onClose}
-            className="flex-1 bg-indigo-600 text-white font-bold py-4 rounded-2xl hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-900/10"
-          >
-            <LifeBuoy className="w-5 h-5" />
-            Contact Support
-          </button>
-          <button 
-            onClick={onClose}
-            className="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-2xl hover:bg-slate-200 transition-all"
+            className="flex-1 bg-slate-900 text-white font-bold py-4 rounded-2xl hover:bg-slate-800 transition-all uppercase tracking-wider text-xs"
           >
             Close
           </button>
@@ -116,6 +108,187 @@ export function SelectTransferTypeModal({ isOpen, onClose, onSelect }: { isOpen:
           </div>
         </button>
       </div>
+    </Modal>
+  );
+}
+
+export function TransferSuccessModal({ 
+  isOpen, 
+  onClose, 
+  amount, 
+  recipientName, 
+  bankName, 
+  accountNumber 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  amount: number; 
+  recipientName: string; 
+  bankName: string; 
+  accountNumber: string; 
+}) {
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Transfer Pending">
+      <div className="flex flex-col items-center text-center gap-6">
+        <div className="w-20 h-20 bg-amber-50 rounded-3xl flex items-center justify-center text-amber-500 mb-2 animate-pulse">
+          <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        
+        <div className="space-y-2">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest text-[10px]">Processing Transfer</p>
+          <p className="text-3xl font-extrabold text-slate-900 tracking-tight">
+            ${amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+          </p>
+        </div>
+
+        <div className="w-full bg-slate-50 rounded-2xl p-6 text-left space-y-4 border border-slate-100">
+          <div className="flex justify-between items-center text-xs">
+            <span className="font-bold text-slate-400 uppercase tracking-wider text-[9px]">Recipient Name</span>
+            <span className="font-bold text-slate-800">{recipientName}</span>
+          </div>
+          <div className="flex justify-between items-center text-xs">
+            <span className="font-bold text-slate-400 uppercase tracking-wider text-[9px]">Bank Name</span>
+            <span className="font-bold text-slate-800">{bankName}</span>
+          </div>
+          <div className="flex justify-between items-center text-xs">
+            <span className="font-bold text-slate-400 uppercase tracking-wider text-[9px]">Account Number</span>
+            <span className="font-bold text-slate-800">{accountNumber}</span>
+          </div>
+          <div className="flex justify-between items-center text-xs">
+            <span className="font-bold text-slate-400 uppercase tracking-wider text-[9px]">Status</span>
+            <span className="px-2.5 py-1 bg-amber-50 text-amber-600 font-bold rounded-full uppercase tracking-widest text-[9px]">
+              Pending
+            </span>
+          </div>
+        </div>
+
+        <button 
+          onClick={onClose}
+          className="w-full bg-[#003399] text-white font-bold py-4 rounded-2xl hover:bg-blue-800 transition-all shadow-lg shadow-blue-900/10 uppercase tracking-wider text-xs"
+        >
+          Done
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+export function TransferCodeModal({
+  isOpen,
+  onClose,
+  onVerify,
+  amount
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onVerify: () => void;
+  amount: number;
+}) {
+  const [code, setCode] = React.useState(['', '', '', '']);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
+
+  const handleInputChange = (index: number, val: string) => {
+    if (isNaN(Number(val))) return;
+    const nextCode = [...code];
+    nextCode[index] = val.slice(-1);
+    setCode(nextCode);
+    setError('');
+
+    if (val && index < 3) {
+      const nextInput = document.getElementById(`tcode-${index + 1}`);
+      nextInput?.focus();
+    }
+  };
+
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !code[index] && index > 0) {
+      const prevInput = document.getElementById(`tcode-${index - 1}`);
+      prevInput?.focus();
+    }
+  };
+
+  const handleVerify = (e: React.FormEvent) => {
+    e.preventDefault();
+    const joined = code.join('');
+    if (joined !== '1975') {
+      setError('Invalid Transfer Authorization Code. Authentication failed.');
+      setCode(['', '', '', '']);
+      document.getElementById('tcode-0')?.focus();
+      return;
+    }
+
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      onVerify();
+      setCode(['', '', '', '']);
+    }, 2000);
+  };
+
+  return (
+    <Modal isOpen={isOpen} onClose={loading ? () => {} : onClose} title="Transfer Authorization">
+      <form onSubmit={handleVerify} className="space-y-6">
+        <div className="flex flex-col items-center text-center gap-4">
+          <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-[#003399] mb-1">
+            <svg className="w-8 h-8 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          
+          <div className="space-y-1">
+            <h3 className="text-lg font-bold text-slate-900">Confirm & Authorize</h3>
+            <p className="text-xs text-slate-500 max-w-sm">
+              Enter the 4-digit transfer code to confirm the payment of <strong className="text-slate-900">${amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong>.
+            </p>
+          </div>
+
+          <div className="text-xs font-bold bg-amber-50 text-amber-600 border border-amber-100 px-4 py-2 rounded-full uppercase tracking-widest flex items-center gap-2 mt-1 select-none">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+            Status: Pending approval
+          </div>
+
+          {loading ? (
+            <div className="flex flex-col items-center py-6 gap-3">
+              <div className="w-10 h-10 border-4 border-[#003399] border-t-transparent rounded-full animate-spin" />
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Verifying Transfer Code...</p>
+            </div>
+          ) : (
+            <div className="flex justify-center gap-4 py-4">
+              {code.map((digit, idx) => (
+                <input
+                  key={idx}
+                  id={`tcode-${idx}`}
+                  type="text"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleInputChange(idx, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(idx, e)}
+                  className="w-14 h-14 text-center bg-slate-50 border border-slate-100 rounded-xl text-xl font-bold focus:bg-white focus:border-blue-200 outline-none transition-all"
+                  required
+                />
+              ))}
+            </div>
+          )}
+
+          {error && (
+            <p className="text-xs font-bold text-rose-500 text-center bg-rose-50 py-3 px-6 rounded-lg border border-rose-100 italic w-full">
+              {error}
+            </p>
+          )}
+
+          {!loading && (
+            <button
+              type="submit"
+              className="w-full bg-[#003399] text-white font-bold py-4 rounded-2xl hover:bg-blue-800 transition-all shadow-lg shadow-blue-900/10 uppercase tracking-wider text-xs"
+            >
+              Verify & Complete Transfer
+            </button>
+          )}
+        </div>
+      </form>
     </Modal>
   );
 }
