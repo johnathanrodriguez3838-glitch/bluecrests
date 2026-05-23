@@ -14,7 +14,7 @@ export const USER_DATA: UserProfile = {
   pin: "1975",
   dob: "1975",
   phone: "252 203 3663",
-  country: "Underfed state",
+  country: "United States of America",
   state: "NC",
   city: "Cary",
   balance: 3800000,

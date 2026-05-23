@@ -108,7 +108,7 @@ export default function TransferPage({
                 <input 
                   type="text" 
                   value={accountNumber}
-                  onChange={(e) => setAccountNumber(e.target.value)}
+                  onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, ''))}
                   placeholder="Account Number"
                   className="w-full h-14 bg-slate-50 border border-slate-100 focus:bg-white focus:border-indigo-100 rounded-2xl pl-12 pr-4 text-sm font-semibold outline-none transition-all"
                   required
@@ -123,7 +123,7 @@ export default function TransferPage({
                 <input 
                   type="text" 
                   value={routingNumber}
-                  onChange={(e) => setRoutingNumber(e.target.value)}
+                  onChange={(e) => setRoutingNumber(e.target.value.replace(/\D/g, ''))}
                   placeholder="9-digit routing number (optional)" 
                   className="w-full h-14 bg-slate-50 border border-slate-100 focus:bg-white focus:border-indigo-100 rounded-2xl pl-12 pr-4 text-sm font-semibold outline-none transition-all"
                 />
