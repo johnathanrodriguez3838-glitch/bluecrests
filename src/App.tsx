@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import DashboardOverview from './components/DashboardOverview';
@@ -27,9 +27,22 @@ export default function App() {
   const [isSelectTypeModalOpen, setIsSelectTypeModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isTransferCodeModalOpen, setIsTransferCodeModalOpen] = useState(false);
-  const [transactions, setTransactions] = useState(TRANSACTIONS);
-  const [balance, setBalance] = useState(USER_DATA.balance);
-  const [transferCount, setTransferCount] = useState(0);
+  
+  const [transactions, setTransactions] = useState(() => {
+    const saved = localStorage.getItem('bank_transactions');
+    return saved ? JSON.parse(saved) : TRANSACTIONS;
+  });
+  
+  const [balance, setBalance] = useState(() => {
+    const saved = localStorage.getItem('bank_balance');
+    return saved ? Number(saved) : USER_DATA.balance;
+  });
+
+  const [transferCount, setTransferCount] = useState(() => {
+    const saved = localStorage.getItem('bank_transfer_count');
+    return saved ? Number(saved) : 0;
+  });
+
   const [lastTransfer, setLastTransfer] = useState<{ amount: number; recipientName: string; bankName: string; accountNumber: string } | null>(null);
   const [pendingTransfer, setPendingTransfer] = useState<{
     txnId: string;
@@ -38,6 +51,19 @@ export default function App() {
     bankName: string;
     accountNumber: string;
   } | null>(null);
+
+  // Sync state changes to localStorage
+  useEffect(() => {
+    localStorage.setItem('bank_transactions', JSON.stringify(transactions));
+  }, [transactions]);
+
+  useEffect(() => {
+    localStorage.setItem('bank_balance', balance.toString());
+  }, [balance]);
+
+  useEffect(() => {
+    localStorage.setItem('bank_transfer_count', transferCount.toString());
+  }, [transferCount]);
 
   const handleVerifyTransferCode = useCallback(() => {
     if (!pendingTransfer) return;
