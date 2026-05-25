@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { 
   LayoutDashboard, 
   User, 
@@ -10,7 +11,8 @@ import {
   Shield, 
   Key,
   ChevronRight,
-  LogOut
+  LogOut,
+  RotateCcw
 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 
@@ -42,6 +44,31 @@ const MENU_ITEMS = [
 ];
 
 export default function Sidebar({ activeTab, setActiveTab, isOpen, setIsOpen, onLogout }: SidebarProps) {
+  const [resetState, setResetState] = useState<'idle' | 'resetting' | 'success' | 'failed'>('idle');
+
+  const handleResetDatabase = async () => {
+    if (resetState === 'resetting') return;
+    if (!window.confirm("Are you sure you want to reset all bank data? This will restore balances and transactions across ALL devices.")) return;
+    
+    setResetState('resetting');
+    try {
+      const res = await fetch('/api/reset', { method: 'POST' });
+      if (res.ok) {
+        setResetState('success');
+        setTimeout(() => {
+          window.location.reload();
+        }, 1200);
+      } else {
+        setResetState('failed');
+        setTimeout(() => setResetState('idle'), 3000);
+      }
+    } catch (err) {
+      console.error(err);
+      setResetState('failed');
+      setTimeout(() => setResetState('idle'), 3000);
+    }
+  };
+
   return (
     <>
       {/* Mobile Overlay */}
@@ -110,6 +137,19 @@ export default function Sidebar({ activeTab, setActiveTab, isOpen, setIsOpen, on
           </div>
           <p className="text-[10px] text-slate-400 leading-tight">You're $2,400 away from your summer trip goal.</p>
         </div>
+
+        <button 
+          onClick={handleResetDatabase}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-slate-50 transition-all font-bold text-sm"
+        >
+          <RotateCcw className={cn("w-5 h-5", resetState === 'resetting' && "animate-spin text-[#003399]", resetState === 'success' && "text-emerald-500")} />
+          <span>
+            {resetState === 'idle' && 'Reset Postgres DB'}
+            {resetState === 'resetting' && 'Resetting DB...'}
+            {resetState === 'success' && 'Reset Successful!'}
+            {resetState === 'failed' && 'Reset Failed!'}
+          </span>
+        </button>
 
         <button 
           onClick={onLogout}

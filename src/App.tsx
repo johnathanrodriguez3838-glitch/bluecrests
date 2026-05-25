@@ -65,6 +65,42 @@ export default function App() {
     localStorage.setItem('bank_transfer_count', transferCount.toString());
   }, [transferCount]);
 
+  // Synchronize state with Neon Postgres Database upon mounting / log in
+  useEffect(() => {
+    if (isLoggedIn) {
+      // 1. Fetch user values (balance, transfer count)
+      fetch(`/api/user?email=${USER_DATA.email}`)
+        .then(res => {
+          if (!res.ok) throw new Error("Database fetch error");
+          return res.json();
+        })
+        .then(data => {
+          if (data && typeof data.balance === 'number') {
+            setBalance(data.balance);
+            setTransferCount(data.transfer_count);
+          }
+        })
+        .catch(err => {
+          console.warn("Could not sync user from custom server:", err);
+        });
+
+      // 2. Fetch transaction history
+      fetch(`/api/transactions?email=${USER_DATA.email}`)
+        .then(res => {
+          if (!res.ok) throw new Error("Database fetch error");
+          return res.json();
+        })
+        .then(data => {
+          if (Array.isArray(data)) {
+            setTransactions(data);
+          }
+        })
+        .catch(err => {
+          console.warn("Could not sync transactions from custom server:", err);
+        });
+    }
+  }, [isLoggedIn]);
+
   const handleVerifyTransferCode = useCallback(() => {
     if (!pendingTransfer) return;
 
@@ -78,6 +114,29 @@ export default function App() {
     setTransactions(prev => prev.map(t => 
       t.id === pendingTransfer.txnId ? { ...t, status: 'Pending' as const } : t
     ));
+
+    // Sync validation with PostgreSQL database backend
+    fetch('/api/transfers/complete', {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        txnId: pendingTransfer.txnId,
+        amount: pendingTransfer.amount,
+        user_email: USER_DATA.email
+      })
+    })
+    .then(async (res) => {
+      // Re-fetch user specs from Postgres to ensure complete accuracy across devices
+      const userRes = await fetch(`/api/user?email=${USER_DATA.email}`);
+      const userData = await userRes.json();
+      if (userData && typeof userData.balance === 'number') {
+        setBalance(userData.balance);
+        setTransferCount(userData.transfer_count);
+      }
+    })
+    .catch(err => {
+      console.warn("Could not sync complete transfer event to Postgres:", err);
+    });
 
     // Store details for success modal display
     setLastTransfer({
@@ -156,6 +215,21 @@ export default function App() {
 
                 // Add to history in 'Pending' status
                 setTransactions(prev => [newTxn, ...prev]);
+
+                // Store transfer in database
+                fetch('/api/transfers', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    user_email: USER_DATA.email,
+                    recipient_name: data.recipientName,
+                    amount: data.amount,
+                    category: data.description || 'Fund Transfer',
+                    type: 'debit',
+                    status: 'Pending',
+                    id: txnId
+                  })
+                }).catch(err => console.error("Could not sync pending transfer to Postgres server:", err));
 
                 // Store details for verification
                 setPendingTransfer({
